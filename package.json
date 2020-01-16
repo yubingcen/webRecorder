@@ -1,0 +1,19 @@
+{
+  "name": "webrecorder",
+  "version": "1.0.0",
+  "description": "Browser recording",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yubingcen/webRecorder.git"
+  },
+  "author": "yubingcen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yubingcen/webRecorder/issues"
+  },
+  "homepage": "https://github.com/yubingcen/webRecorder#readme"
+}
