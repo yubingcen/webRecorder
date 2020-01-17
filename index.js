@@ -1,5 +1,6 @@
 class webRecorder {
-  constructor() {
+  constructor(elements) {
+    this.element = elements || 'browser'
     this.options = {
       mimeType: 'video/webm;codecs=vp9'
     }
@@ -10,21 +11,33 @@ class webRecorder {
   }
 
   info(message) {
-    console.log('%c[StreamRecorder]%c ' + message, 'font-weight: bold; color: purple;', null)
+    console.log('%c[webRecorder]%c ' + message, 'font-weight: bold; color: purple;', null)
   }
 
   warn(message) {
-    console.warn('%c[StreamRecorder]%c ' + message, 'font-weight: bold; color: purple;', null)
+    console.warn('%c[webRecorder]%c ' + message, 'font-weight: bold; color: purple;', null)
   }
 
   error(message) {
-    console.error('%c[StreamRecorder]%c ' + message, 'font-weight: bold; color: purple;', null)
+    console.error('%c[webRecorder]%c ' + message, 'font-weight: bold; color: purple;', null)
   }
 
   async getRecorder() {
     if (this.stream) {
-      this.warn("It's recording now!")
+      this.warn('It is recording now!')
       return false
+    }
+    if (this.element !== 'browser') {
+      const videos = this.getElement(this.element)
+      if (!videos) {
+        this.error('Cannot find any stream canvas.')
+        return false
+      } else {
+        const canvas = videos
+        this.stream = canvas.captureStream()
+        this.recorder = new MediaRecorder(this.stream, this.options)
+        return true
+      }
     }
     await navigator.mediaDevices.getDisplayMedia({
       video: true
@@ -43,7 +56,6 @@ class webRecorder {
   }
 
   handleData(event) {
-    console.log('hd：', event)
     if (event.data.size > 0) {
       // MediaRecorder.stop() is non-blocking. Call saveToFile() after actually saving the chunk.
       this.recordedChunks.push(event.data)
@@ -53,6 +65,32 @@ class webRecorder {
       this.warn('Received data is empty.')
     }
     // return
+  }
+
+  /**
+   * 
+   * @param {string} element 
+   * you can input .xxx, #xxx, video
+   */
+  getElement (element) {
+    let videos = null
+    if (element === 'video' || element.startsWith('.')) {
+      videos = element === 'video' ? document.getElementsByTagName('video') : document.getElementsByClassName(element.substr(1))
+      if (videos[0]) {
+        return videos[0]
+      } else {
+        return false
+      }
+    }
+    if (element.startsWith('#')) {
+      videos = document.getElementById(element.substr(1))
+      if (videos) {
+        return videos
+      }
+    }
+    
+    this.error('this web is no video !')
+    return false
   }
 
   async start() {
@@ -66,7 +104,6 @@ class webRecorder {
     }
 
     this.recordedChunks = []
-    console.log('th', this)
     this.recorder.addEventListener('dataavailable', e => this.handleData(e))
     this.recorder.start()
     this.recording = true
